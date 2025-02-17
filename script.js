@@ -1,12 +1,24 @@
-function calculateCompoundInterest(principal, rate, time, compounds) {
-    const r = rate / 100; // Convert percentage to decimal
-    return principal * Math.pow(1 + r/compounds, compounds * time);
+function calculateMonthlyCompoundInterest(principal, yearlyRate, months, monthlyExpense) {
+    const monthlyRate = yearlyRate / 12 / 100; // Convert yearly rate to monthly decimal
+    let balance = principal;
+    
+    // Apply monthly compounding and subtract expenses for each month
+    for (let month = 0; month < months; month++) {
+        // Add monthly interest
+        balance = balance * (1 + monthlyRate);
+        // Subtract monthly expense
+        balance = balance - monthlyExpense;
+    }
+    
+    return Math.max(0, balance); // Prevent negative balance
 }
 
-function generateSchedule(principal, rate, years, compounds) {
+function generateSchedule(principal, yearlyRate, years, monthlyExpense) {
     const schedule = [];
+    
     for (let year = 0; year <= years; year++) {
-        const balance = calculateCompoundInterest(principal, rate, year, compounds);
+        const months = year * 12;
+        const balance = calculateMonthlyCompoundInterest(principal, yearlyRate, months, monthlyExpense);
         schedule.push([year, balance]);
     }
     return schedule;
@@ -16,9 +28,9 @@ function calculate() {
     const principal = parseFloat(document.getElementById('principal').value);
     const rate = parseFloat(document.getElementById('rate').value);
     const time = parseInt(document.getElementById('time').value);
-    const compounds = parseInt(document.getElementById('compounds').value);
+    const monthlyExpense = parseFloat(document.getElementById('monthlyExpense').value);
 
-    const finalAmount = calculateCompoundInterest(principal, rate, time, compounds);
+    const finalAmount = calculateMonthlyCompoundInterest(principal, rate, time * 12, monthlyExpense);
 
     // Display results
     const resultsDiv = document.getElementById('results');
@@ -27,12 +39,12 @@ function calculate() {
         <p>Initial Investment: $${principal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
         <p>Interest Rate: ${rate}%</p>
         <p>Time Period: ${time} years</p>
-        <p>Compounding Frequency: ${compounds} times per year</p>
+        <p>Monthly Expense: $${monthlyExpense.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
         <p>Final Amount: $${finalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
     `;
 
     // Generate and display schedule
-    const schedule = generateSchedule(principal, rate, time, compounds);
+    const schedule = generateSchedule(principal, rate, time, monthlyExpense);
     const scheduleDiv = document.getElementById('schedule');
     let scheduleHTML = `
         <h2>Yearly Investment Schedule</h2>
@@ -57,4 +69,4 @@ function calculate() {
 }
 
 // Calculate on page load
-calculate(); 
+calculate();
