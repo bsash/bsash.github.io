@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compound Interest Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .calculator {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Compound Interest Calculator</h1>
+    
+    <div class="calculator">
+        <div class="input-group">
+            <label for="principal">Initial Investment ($):</label>
+            <input type="number" id="principal" value="1000" min="0" step="100">
+        </div>
+        
+        <div class="input-group">
+            <label for="rate">Annual Interest Rate (%):</label>
+            <input type="number" id="rate" value="5" min="0" max="100" step="0.1">
+        </div>
+        
+        <div class="input-group">
+            <label for="time">Time Period (years):</label>
+            <input type="number" id="time" value="5" min="1" step="1">
+        </div>
+        
+        <div class="input-group">
+            <label for="compounds">Compounds per Year:</label>
+            <input type="number" id="compounds" value="12" min="1" step="1">
+        </div>
+        
+        <button onclick="calculate()">Calculate</button>
+    </div>
+
+    <div class="results" id="results"></div>
+    <div id="schedule"></div>
+
+    <script>
+        function calculateCompoundInterest(principal, rate, time, compounds) {
+            const r = rate / 100; // Convert percentage to decimal
+            return principal * Math.pow(1 + r/compounds, compounds * time);
+        }
+
+        function generateSchedule(principal, rate, years, compounds) {
+            const schedule = [];
+            for (let year = 0; year <= years; year++) {
+                const balance = calculateCompoundInterest(principal, rate, year, compounds);
+                schedule.push([year, balance]);
+            }
+            return schedule;
+        }
+
+        function calculate() {
+            const principal = parseFloat(document.getElementById('principal').value);
+            const rate = parseFloat(document.getElementById('rate').value);
+            const time = parseInt(document.getElementById('time').value);
+            const compounds = parseInt(document.getElementById('compounds').value);
+
+            const finalAmount = calculateCompoundInterest(principal, rate, time, compounds);
+
+            // Display results
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h2>Results</h2>
+                <p>Initial Investment: $${principal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                <p>Interest Rate: ${rate}%</p>
+                <p>Time Period: ${time} years</p>
+                <p>Compounding Frequency: ${compounds} times per year</p>
+                <p>Final Amount: $${finalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+            `;
+
+            // Generate and display schedule
+            const schedule = generateSchedule(principal, rate, time, compounds);
+            const scheduleDiv = document.getElementById('schedule');
+            let scheduleHTML = `
+                <h2>Yearly Investment Schedule</h2>
+                <table>
+                    <tr>
+                        <th>Year</th>
+                        <th>Balance</th>
+                    </tr>
+            `;
+            
+            schedule.forEach(([year, balance]) => {
+                scheduleHTML += `
+                    <tr>
+                        <td>Year ${year}</td>
+                        <td>$${balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+            
+            scheduleHTML += '</table>';
+            scheduleDiv.innerHTML = scheduleHTML;
+        }
+
+        // Calculate on page load
+        calculate();
+    </script>
+</body>
+</html> 
